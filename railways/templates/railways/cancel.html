@@ -1,0 +1,27 @@
+{% extends "railways/layout.html" %}
+
+{%block title%}
+Cancel Ticket
+{%endblock%}
+
+{% block body %}
+
+<div class="container">
+    <form action="{% url 'cancel' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="PNR">PNR Number</label>
+            <input type="text" name="pnr" class="form-control" id="PNR" placeholder="10 digit PNR Number">
+        </div>
+        <div class="form-group">
+            <input type="submit"  class="form-control" value="Search">
+        </div>
+    </form>
+
+    <div>
+        <h6>{{passengers}}</h6>
+    </div>
+
+</div>
+
+{%endblock%}

@@ -1,0 +1,61 @@
+{% extends "railways/layout.html" %}
+
+{%block title%}
+Check Train
+{%endblock%}
+
+{% block body %}
+
+<div class="container">
+
+    <form action="{% url 'check_train' %}" method="POST">
+
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="From"><h4>Start Station</h4></label>
+            <input name="from" list="from_city" id="From" class="form-control"  required>
+            <datalist id="from_city">
+                {% for city in cities%}
+                    <option value="{{city}}">{{city}}</option>
+                {%endfor%}
+            </datalist>
+        </div>
+        <div class="form-group">
+            <label for="To"><h4>End Station</h4></label>
+            <input name="to" list="to_city" id="To" class="form-control"  required>
+            <datalist id="to_city">
+                {% for city in cities%}
+                    <option value="{{city}}">{{city}}</option>
+                {%endfor%}
+            </datalist>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div class="displayTrain">
+        {%for train in trains%}
+
+        <div class="post">
+            <p class="float-right"> <i class="fa fa-train"></i> {{train.trainName}}</p>
+            <h4>{{train.trainNo}}</a></h4>
+            <div>
+                <h5> {{train.origin}}({{train.startTime}}) <ion-icon name="navigate-circle"></ion-icon> {{train.destination}}({{train.endTime}}) </h5>
+                <h6> <i class="fas fa-clock"></i> <ion-icon name="time-outline"></ion-icon> {{train.travelTime}} minutes</h6>
+                <p class="text-muted">
+                    <i class="fa fa-calendar"></i>
+                    {% for day in train.travelDays.all%}
+                        {{day}}
+                    {%endfor%}
+                </p>
+            </div>
+        </div>
+
+
+        
+        {%endfor%}
+    </div>
+
+</div>
+
+{%endblock%}

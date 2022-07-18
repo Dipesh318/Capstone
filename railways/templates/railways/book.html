@@ -1,0 +1,158 @@
+{% extends "railways/layout.html" %}
+
+{%block title%}
+Booking
+{%endblock%}
+
+{% block body %}
+
+<div class="container">
+
+
+    <div class="displayTrain">
+        <div class="post">
+            <p class="float-right"> <i class="fa fa-calendar"></i> {{data.date}}</p>
+            <h4><i class="fa fa-train"></i> {{data.train}}</h4>
+            
+            <h5>{{data.train.origin}} <ion-icon name="navigate-circle"></ion-icon> {{data.train.destination}}</h5>
+            <hr>
+            <div class="row">
+                <div class="col md-3" style="text-align: center;">
+                   AC_I : <span id="AC_I">{{data.AC_I}}</span>
+                </div>
+                <div class="col md-3" style="text-align: center;">
+                    AC_II : <span id="AC_II">{{data.AC_II}}</span>
+                </div>
+                <div class="col md-3" style="text-align: center;">
+                    AC_III : <span id="AC_III">{{data.AC_III}}</span>
+                </div>
+                <div class="col md-3" style="text-align: center;">
+                    Sleeper : <span id="AC_Sleeper">{{data.Sleeper}}</span>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="booking_form">
+        <from>
+            <div class="row form-group">
+                <div class="col">
+                  <input type="text" id="fname" class="form-control" name="Firstname" placeholder="First name" required>
+                </div>
+                <div class="col">
+                  <input type="text" id="lname" class="form-control" name="Lastname" placeholder="Last name" required>
+                </div>
+                <div class="col">
+                    <input type="number" id="age" class="form-control" name="age" placeholder="Age" required>
+                </div>
+                <div class="col">
+                    <input name="sex" list="gender_selection" id="gender" class="form-control" placeholder="Gender" required>
+                    <datalist id="gender_selection">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </datalist>
+                </div>
+                <div class="col">
+                    <input name="seat" list="seatType" id="seat" class="form-control" placeholder="Seat" required>
+                    <datalist id="seatType">
+                        <option value="AC_I">AC_I</option>
+                        <option value="AC_II">AC_II</option>
+                        <option value="AC_III">AC_III</option>
+                        <option value="Sleeper">Sleeper</option>
+                    </datalist>
+                </div>
+                <div class="col">
+                    <button class="form-control add" data-train="{{data.train}}" data-date="{{data.date}}">Add</button>
+                </div>
+            </div>  
+        </from>
+        <h4>Total Price : <span class="price">0</span></h4>
+        <div class="form-group">
+            <button type="submit"  class="form-control pay btn btn-outline-primary" > Done </button>
+        </div>
+
+        <form action="{% url 'payment' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" name="pnr" id="pnrField" class="form-control" placeholder="Make sure you see your PNR here before proceeding to payment">
+            </div>
+            <div class="form-group">
+                <button type="submit"  class="form-control btn btn-outline-primary" > Proceed to Payment </button>
+                
+            </div>
+        </form>
+        
+        <hr>
+        
+        <div class="passengers">
+
+        </div>
+    </div>
+
+
+</div>
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded",()=>{
+        var pnr = Math.floor(1000000000 + Math.random() * 900000)
+        var cost = 0
+        document.querySelector(".add").addEventListener("click",function(){
+            raw = document.querySelector(".add").dataset
+            const fname = document.querySelector("#fname").value
+            const lname = document.querySelector("#lname").value
+            const age = document.querySelector("#age").value
+            const gender = document.querySelector("#gender").value
+            const seat = document.querySelector("#seat").value
+            const train = raw.train
+            const date = raw.date
+            fetch("/"+train+"/"+date+"/"+fname+"/"+lname+"/"+age+"/"+gender+"/"+seat+"/"+pnr+"/"+cost)
+            .then(response => response.text())
+            .then(text =>{
+                    console.log(text)
+                    if (seat == "Sleeper"){
+                        cost = cost + 750
+                        document.querySelector("#Sleeper").innerHTML = text
+                    }
+                    else if (seat === "AC_I"){
+                        cost = cost + 2200
+                        document.querySelector("#AC_I").innerHTML = text
+                    }
+                    else if (seat === "AC_II"){
+                        cost = cost + 1600
+                        document.querySelector("#AC_II").innerHTML = text
+                    }
+                        
+                    else if (seat == "AC_III"){
+                        cost = cost + 1250
+                        document.querySelector("#AC_III").innerHTML = text
+                    }
+                        
+                    const node = document.createElement("li")
+                    var textnode = document.createTextNode(fname+" "+lname+"   "+"        PNR: "+pnr);
+                    node.appendChild(textnode);  
+                    document.querySelector(".passengers").append(node)
+                    console.log(cost)
+                    document.querySelector(".price").innerHTML = cost
+                
+            })
+        })
+
+        document.querySelector(".pay").addEventListener("click",function(){
+            console.log(cost)
+            fetch("/pay/"+pnr+"/"+cost)
+            .then(response => response.text())
+            .then(text => {
+                console.log("DONE")
+                document.querySelector("#pnrField").value = pnr
+            })
+        })
+    })
+
+</script>
+
+
+{%endblock%}
